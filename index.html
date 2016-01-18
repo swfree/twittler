@@ -18,12 +18,13 @@
       $(document).ready(function(){
         var $container = $('.container');
 
-        var refreshTweets = function(){
+        // sets up a twittler feed
+        var tweetStream = function(userHome){
           $container.html('');
-          var index = streams.home.length - 1;
-          
+          var index = userHome.length - 1;
+
           while(index >= 0){
-            var tweet = streams.home[index];
+            var tweet = userHome[index];
             var $tweet = $('<div class="tweet"></div>');
             $tweet.html('<strong>@' + tweet.user + ' </strong>' 
                         + '<span>'+ tweet.created_at + '</span><br>'
@@ -33,49 +34,46 @@
           }
         };
 
-        //run once to set up home screen
-        refreshTweets();
+        // runs twittler homepage
+        var homePage = function(){
+          tweetStream(streams.home)
+        };
+
+        // launch homepage
+        homePage();
         
-        //launches autoscroll event
-        var autoScroll = setInterval(refreshTweets, 5000);
+        // launch autoscroll event on home page
+        var autoScroll = setInterval(homePage, 5000);
         
-        //on/off switch for autoscroll event 
+        // on/off switch for autoscroll event 
         $('#scroll-btn').click(function(event){
           if ($(this).prop('value') === 'Pause Scroll'){
             clearInterval(autoScroll);
             $(this).prop('value', ' Start Scroll');
           } else {
             $(this).prop('value', 'Pause Scroll');
-            autoScroll = setInterval(refreshTweets, 5000);
+            autoScroll = setInterval(homePage, 5000);
           }
         });
 
-        //FIX BUG: cannot click tweets after first refreshTweets runthrough 
-        //FEATURE: return to home
+        // launch user feed on click
         $('.tweet').on('click', function(){
           var username = $(this).text();
+
+          // regexp used to extract username string from clicked div
           username = /@\S*/.exec(username)[0].split('@')[1];
 
           clearInterval(autoScroll);
           $('h1').text(username + ' feed');
         
-          $container.html('');
-          var index = streams.users[username].length - 1;
-
-          while(index >= 0){
-            var tweet = streams.users[username][index];
-            var $tweet = $('<div class="tweet"></div>');
-            $tweet.html('<span>' + tweet.created_at + '</span><br>' + tweet.message);
-            $tweet.appendTo($container);
-            index -= 1;
-          }
+          tweetStream(streams.users[username]);
         });
       });
 
-
-    //Next Steps:
-    ////Click on user and see all that user's tweets
-    ////Turn timestamp into "10 minutes ago"
+    // Next Steps:
+    //// FIX BUG: cannot click tweets after initial homePage runthrough 
+    //// ADD FEATURE: return to home        
+    //// Turn timestamp into user friendly text
 
     </script>
   </body>
