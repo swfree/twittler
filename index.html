@@ -8,8 +8,8 @@
   <body>
     <div class="navbar">
       <ul>
-        <li>Home</li>
-        <li><button onclick="stopScroll()">Pause Scroll</button></li>
+        <li><a href="#top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Home</a></li>
+        <li><input type="button" value="Pause Scroll" id="scroll-btn"/></li>
       </ul>
     </div><div class="header"><h1>Twittler Feed</h1></div>
     <div class="container"></div>
@@ -33,17 +33,47 @@
           }
         };
 
+        //run once to set up home screen
         refreshTweets();
         
-        var autoScroll = setInterval(refreshTweets, 10000);
+        //launches autoscroll event
+        var autoScroll = setInterval(refreshTweets, 5000);
         
-        var stopScroll = function() {
+        //on/off switch for autoscroll event 
+        $('#scroll-btn').click(function(event){
+          if ($(this).prop('value') === 'Pause Scroll'){
+            clearInterval(autoScroll);
+            $(this).prop('value', ' Start Scroll');
+          } else {
+            $(this).prop('value', 'Pause Scroll');
+            autoScroll = setInterval(refreshTweets, 5000);
+          }
+        });
+
+        //FIX BUG: cannot click tweets after first refreshTweets runthrough 
+        //FEATURE: return to home
+        $('.tweet').on('click', function(){
+          var username = $(this).text();
+          username = /@\S*/.exec(username)[0].split('@')[1];
+
           clearInterval(autoScroll);
-        };
+          $('h1').text(username + ' feed');
+        
+          $container.html('');
+          var index = streams.users[username].length - 1;
+
+          while(index >= 0){
+            var tweet = streams.users[username][index];
+            var $tweet = $('<div class="tweet"></div>');
+            $tweet.html('<span>' + tweet.created_at + '</span><br>' + tweet.message);
+            $tweet.appendTo($container);
+            index -= 1;
+          }
+        });
       });
 
+
     //Next Steps:
-    ////Automatic Refresh of tweets with on/off button
     ////Click on user and see all that user's tweets
     ////Turn timestamp into "10 minutes ago"
 
