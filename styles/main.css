@@ -65,8 +65,13 @@ a, input, .navbar ul li {
   background-color: white;
 }
 
-span {
+.timestamp {
   color: grey;
+}
+
+.username:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .tweet {

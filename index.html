@@ -8,7 +8,7 @@
   <body>
     <div class="navbar">
       <ul>
-        <li><a href="#top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Home</a></li>
+        <li><a href="#top" id="home">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Home</a></li>
         <li><input type="button" value="Pause Scroll" id="scroll-btn"/></li>
       </ul>
     </div><div class="header"><h1>Twittler Feed</h1></div>
@@ -26,17 +26,42 @@
           while(index >= 0){
             var tweet = userHome[index];
             var $tweet = $('<div class="tweet"></div>');
-            $tweet.html('<strong>@' + tweet.user + ' </strong>' 
-                        + '<span>'+ tweet.created_at + '</span><br>'
+            $tweet.html('<strong>@<span class="username">' + tweet.user + '</span> </strong>' 
+                        + '<span class="timestamp">'+ tweet.created_at + '</span><br>'
                         + tweet.message);
             $tweet.appendTo($container);
             index -= 1;
           }
+
+          // launch user-specific feed on click
+          $('.username').on('click', function(){
+            var userN = $(this)[0].innerHTML;
+
+            clearInterval(autoScroll);
+            $('h1').text(userN + ' feed');
+            tweetStream(streams.users[userN]);
+          });
+
+          // return to top or home page
+          $('#home').on('click', function(){
+            if( $('.header')[0].innerText.trim() === 'Twittler Feed' ){
+              $('body').scrollTop(0);
+            } else {
+              clearInterval(autoScroll);
+              homePage();
+              $('h1').text('Twittler Feed');
+              if ( $('#scroll-btn').prop('value', 'Pause Scroll') ){
+                autoScroll = setInterval(homePage, 5000);
+              }
+              //autoScroll = setInterval(homePage, 5000);
+            }
+          });
+
         };
 
         // runs twittler homepage
         var homePage = function(){
-          tweetStream(streams.home)
+          tweetStream(streams.home);
         };
 
         // launch homepage
@@ -52,28 +77,12 @@
             $(this).prop('value', ' Start Scroll');
           } else {
             $(this).prop('value', 'Pause Scroll');
+            clearInterval(autoScroll);
             autoScroll = setInterval(homePage, 5000);
           }
         });
 
-        // launch user feed on click
-        $('.tweet').on('click', function(){
-          var username = $(this).text();
-
-          // regexp used to extract username string from clicked div
-          username = /@\S*/.exec(username)[0].split('@')[1];
-
-          clearInterval(autoScroll);
-          $('h1').text(username + ' feed');
-        
-          tweetStream(streams.users[username]);
-        });
       });
-
-    // Next Steps:
-    //// FIX BUG: cannot click tweets after initial homePage runthrough 
-    //// ADD FEATURE: return to home        
-    //// Turn timestamp into user friendly text
 
     </script>
   </body>
